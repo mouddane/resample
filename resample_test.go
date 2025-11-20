@@ -20,31 +20,32 @@ var NewTest = []struct {
 	inputRate  float64
 	outputRate float64
 	channels   int
-	format     int
+	inFormat   int
+	outFormat  int
 	quality    int
 	err        string
 }{
-	{writer: io.Discard, inputRate: 8000.0, outputRate: 8000.0, channels: 1, format: I16, quality: MediumQ, err: ""},
-	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, format: I16, quality: MediumQ, err: ""},
-	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, format: I32, quality: MediumQ, err: ""},
-	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, format: F32, quality: MediumQ, err: ""},
-	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, format: F64, quality: MediumQ, err: ""},
-	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, format: I16, quality: Quick, err: ""},
-	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, format: I16, quality: LowQ, err: ""},
-	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, format: I16, quality: HighQ, err: ""},
-	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, format: I16, quality: VeryHighQ, err: ""},
-	{writer: nil, inputRate: 8000.0, outputRate: 8000.0, channels: 2, format: I16, quality: MediumQ, err: "io.Writer is nil"},
-	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 0, format: I16, quality: MediumQ, err: "invalid channels number"},
-	{writer: io.Discard, inputRate: 16000.0, outputRate: 0.0, channels: 0, format: I16, quality: MediumQ, err: "invalid input or output sampling rates"},
-	{writer: io.Discard, inputRate: 0.0, outputRate: 8000.0, channels: 0, format: I16, quality: MediumQ, err: "invalid input or output sampling rates"},
-	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, format: 10, quality: MediumQ, err: "invalid format setting"},
-	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, format: I16, quality: 10, err: "invalid quality setting"},
-	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, format: I16, quality: -10, err: "invalid quality setting"},
+	{writer: io.Discard, inputRate: 8000.0, outputRate: 8000.0, channels: 1, inFormat: I16, outFormat: I16, quality: MediumQ, err: ""},
+	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, inFormat: I16, outFormat: I16, quality: MediumQ, err: ""},
+	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, inFormat: I32, outFormat: I32, quality: MediumQ, err: ""},
+	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, inFormat: F32, outFormat: F32, quality: MediumQ, err: ""},
+	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, inFormat: F64, outFormat: F64, quality: MediumQ, err: ""},
+	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, inFormat: I16, outFormat: I16, quality: Quick, err: ""},
+	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, inFormat: I16, outFormat: I16, quality: LowQ, err: ""},
+	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, inFormat: I16, outFormat: I16, quality: HighQ, err: ""},
+	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, inFormat: I16, outFormat: I16, quality: VeryHighQ, err: ""},
+	{writer: nil, inputRate: 8000.0, outputRate: 8000.0, channels: 2, inFormat: I16, outFormat: I16, quality: MediumQ, err: "io.Writer is nil"},
+	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 0, inFormat: I16, outFormat: I16, quality: MediumQ, err: "invalid channels number"},
+	{writer: io.Discard, inputRate: 16000.0, outputRate: 0.0, channels: 0, inFormat: I16, outFormat: I16, quality: MediumQ, err: "invalid input or output sampling rates"},
+	{writer: io.Discard, inputRate: 0.0, outputRate: 8000.0, channels: 0, inFormat: I16, outFormat: I16, quality: MediumQ, err: "invalid input or output sampling rates"},
+	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, inFormat: 10, outFormat: 10, quality: MediumQ, err: "invalid format setting"},
+	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, inFormat: I16, outFormat: I16, quality: 10, err: "invalid quality setting"},
+	{writer: io.Discard, inputRate: 16000.0, outputRate: 8000.0, channels: 2, inFormat: I16, outFormat: I16, quality: -10, err: "invalid quality setting"},
 }
 
 func TestNew(t *testing.T) {
 	for _, tc := range NewTest {
-		res, err := New(tc.writer, tc.inputRate, tc.outputRate, tc.channels, tc.format, tc.quality)
+		res, err := New(tc.writer, tc.inputRate, tc.outputRate, tc.channels, tc.inFormat, tc.outFormat, tc.quality)
 		if err != nil && tc.err != err.Error() {
 			t.Fatalf("Expecting: %s got: %v", tc.err, err)
 		}
@@ -102,7 +103,7 @@ var WriteTest = []struct {
 
 func TestWrite(t *testing.T) {
 	for _, tc := range WriteTest {
-		res, err := New(io.Discard, tc.inputRate, tc.outputRate, tc.channels, I16, MediumQ)
+		res, err := New(io.Discard, tc.inputRate, tc.outputRate, tc.channels, I16, I16, MediumQ)
 		if err != nil {
 			t.Fatal("Failed to create a", tc.name, "Resampler:", err)
 		}
@@ -130,14 +131,15 @@ var FileTest = []struct {
 	inputRate  float64
 	outputRate float64
 	channels   int
-	format     int
+	inFormat   int
+	outFormat  int
 	quality    int
 }{
-	{"testing/piano-16k-16-1.wav", 16000.0, 8000.0, 1, I16, MediumQ},
-	{"testing/piano-16k-16-2.wav", 16000.0, 4000.0, 2, I16, MediumQ},
-	//{"testing/piano-44.1k-16-2.wav", 44100.0, 22050.0, 2, I16, MediumQ},
-	//{"testing/piano-44.1k-32f-2.wav", 44100.0, 48000.0, 2, F32, MediumQ},
-	//{"testing/piano-48k-16-2.wav", 48000, 44100.0, 2, I16, MediumQ},
+	{"testing/piano-16k-16-1.wav", 16000.0, 8000.0, 1, I16, I16, MediumQ},
+	{"testing/piano-16k-16-2.wav", 16000.0, 4000.0, 2, I16, I16, MediumQ},
+	//{"testing/piano-44.1k-16-2.wav", 44100.0, 22050.0, 2, I16, I16, MediumQ},
+	//{"testing/piano-44.1k-32f-2.wav", 44100.0, 48000.0, 2, F32, F32, MediumQ},
+	//{"testing/piano-48k-16-2.wav", 48000, 44100.0, 2, I16, I16, MediumQ},
 }
 
 func TestFile(t *testing.T) {
@@ -147,7 +149,7 @@ func TestFile(t *testing.T) {
 			t.Fatal("Failed to read test data:", err)
 		}
 		var out bytes.Buffer
-		res, err := New(&out, td.inputRate, td.outputRate, td.channels, td.format, td.quality)
+		res, err := New(&out, td.inputRate, td.outputRate, td.channels, td.inFormat, td.outFormat, td.quality)
 		if err != nil {
 			t.Fatal("Failed to create a Resampler:", err)
 		}
@@ -168,7 +170,7 @@ func TestFile(t *testing.T) {
 }
 
 func TestClose(t *testing.T) {
-	res, err := New(io.Discard, 16000.0, 8000.0, 1, I16, MediumQ)
+	res, err := New(io.Discard, 16000.0, 8000.0, 1, I16, I16, MediumQ)
 	if err != nil {
 		t.Fatal("Failed to create a Resampler:", err)
 	}
@@ -187,7 +189,7 @@ func TestClose(t *testing.T) {
 }
 
 func TestReset(t *testing.T) {
-	res, err := New(io.Discard, 16000.0, 8000.0, 1, I16, MediumQ)
+	res, err := New(io.Discard, 16000.0, 8000.0, 1, I16, I16, MediumQ)
 	if err != nil {
 		t.Fatal("Failed to create a Resampler:", err)
 	}
@@ -207,24 +209,25 @@ func TestReset(t *testing.T) {
 
 // Benchmarking data
 var BenchData = []struct {
-	name     string
-	file     string
-	inRate   float64
-	outRate  float64
-	channels int
-	format   int
-	quality  int
+	name      string
+	file      string
+	inRate    float64
+	outRate   float64
+	channels  int
+	inFormat  int
+	outFormat int
+	quality   int
 }{
-	{"16bit 2 ch 44,1->16 Medium", "testing/piano-44.1k-16-2.wav", 44100.0, 16000.0, 2, I16, MediumQ},
-	{"16bit 2 ch 16->8    Medium", "testing/piano-16k-16-2.wav", 16000.0, 8000.0, 2, I16, MediumQ},
-	{"32fl  2 ch 44.1->8  Medium", "testing/piano-44.1k-32f-2.wav", 44100.0, 8000.0, 2, F32, MediumQ},
-	{"16bit 2 ch 44.1->48 Medium", "testing/piano-44.1k-16-2.wav", 44100.0, 48000.0, 2, I16, MediumQ},
-	{"16bit 2 ch 48->44.1 Medium", "testing/piano-48k-16-2.wav", 48000.0, 44100.0, 2, I16, MediumQ},
-	{"16bit 1 ch 16->8     Quick", "testing/piano-16k-16-1.wav", 16000.0, 8000.0, 1, I16, Quick},
-	{"16bit 1 ch 16->8       Low", "testing/piano-16k-16-1.wav", 16000.0, 8000.0, 1, I16, LowQ},
-	{"16bit 1 ch 16->8    Medium", "testing/piano-16k-16-1.wav", 16000.0, 8000.0, 1, I16, MediumQ},
-	{"16bit 1 ch 16->8      High", "testing/piano-16k-16-1.wav", 16000.0, 8000.0, 1, I16, HighQ},
-	{"16bit 1 ch 16->8  VeryHigh", "testing/piano-16k-16-1.wav", 16000.0, 8000.0, 1, I16, VeryHighQ},
+	{"16bit 2 ch 44,1->16 Medium", "testing/piano-44.1k-16-2.wav", 44100.0, 16000.0, 2, I16, I16, MediumQ},
+	{"16bit 2 ch 16->8    Medium", "testing/piano-16k-16-2.wav", 16000.0, 8000.0, 2, I16, I16, MediumQ},
+	{"32fl  2 ch 44.1->8  Medium", "testing/piano-44.1k-32f-2.wav", 44100.0, 8000.0, 2, F32, F32, MediumQ},
+	{"16bit 2 ch 44.1->48 Medium", "testing/piano-44.1k-16-2.wav", 44100.0, 48000.0, 2, I16, I16, MediumQ},
+	{"16bit 2 ch 48->44.1 Medium", "testing/piano-48k-16-2.wav", 48000.0, 44100.0, 2, I16, I16, MediumQ},
+	{"16bit 1 ch 16->8     Quick", "testing/piano-16k-16-1.wav", 16000.0, 8000.0, 1, I16, I16, Quick},
+	{"16bit 1 ch 16->8       Low", "testing/piano-16k-16-1.wav", 16000.0, 8000.0, 1, I16, I16, LowQ},
+	{"16bit 1 ch 16->8    Medium", "testing/piano-16k-16-1.wav", 16000.0, 8000.0, 1, I16, I16, MediumQ},
+	{"16bit 1 ch 16->8      High", "testing/piano-16k-16-1.wav", 16000.0, 8000.0, 1, I16, I16, HighQ},
+	{"16bit 1 ch 16->8  VeryHigh", "testing/piano-16k-16-1.wav", 16000.0, 8000.0, 1, I16, I16, VeryHighQ},
 }
 
 func BenchmarkResampling(b *testing.B) {
@@ -235,7 +238,7 @@ func BenchmarkResampling(b *testing.B) {
 				b.Fatalf("Failed to read test data: %s\n", err)
 			}
 			b.SetBytes(int64(len(rawData[44:])))
-			res, err := New(io.Discard, bd.inRate, bd.outRate, bd.channels, bd.format, bd.quality)
+			res, err := New(io.Discard, bd.inRate, bd.outRate, bd.channels, bd.inFormat, bd.outFormat, bd.quality)
 			if err != nil {
 				b.Fatalf("Failed to create Writer: %s\n", err)
 			}

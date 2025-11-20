@@ -17,6 +17,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -29,26 +30,36 @@ import (
 const wavHeader = 44
 
 var (
-	format = flag.String("format", "i16", "PCM format")
-	ch     = flag.Int("ch", 2, "Number of channels")
-	ir     = flag.Int("ir", 44100, "Input sample rate")
-	or     = flag.Int("or", 0, "Output sample rate")
+	inFormat  = flag.String("if", "i16", "PCM input format")
+	outFormat = flag.String("iof", "i16", "PCM output format")
+	ch        = flag.Int("ch", 2, "Number of channels")
+	ir        = flag.Int("ir", 44100, "Input sample rate")
+	or        = flag.Int("or", 0, "Output sample rate")
 )
+
+func strToFormat(format string) (int, error) {
+	switch strings.ToLower(format) {
+	case "i16":
+		return resample.I16, nil
+	case "i32":
+		return resample.I32, nil
+	case "f32":
+		return resample.F32, nil
+	case "f64":
+		return resample.F64, nil
+	}
+	return 0, fmt.Errorf("unknown format %s", format)
+}
 
 func main() {
 	flag.Parse()
-	var frmt int
-	switch *format {
-	case "i16":
-		frmt = resample.I16
-	case "i32":
-		frmt = resample.I32
-	case "f32":
-		frmt = resample.F32
-	case "f64":
-		frmt = resample.F64
-	default:
-		log.Fatalln("Invalid Format")
+	inFrmt, err := strToFormat(*inFormat)
+	if err != nil {
+		log.Fatalf("Invalid input format : %s", err)
+	}
+	outFrmt, err := strToFormat(*outFormat)
+	if err != nil {
+		log.Fatalf("Invalid output format : %s", err)
 	}
 	if *ch < 1 {
 		log.Fatalln("Invalid channel number")
@@ -61,7 +72,6 @@ func main() {
 	}
 	inputFile := flag.Arg(0)
 	outputFile := flag.Arg(1)
-	var err error
 
 	// Open input file (WAV or RAW PCM)
 	input, err := os.Open(inputFile)
@@ -74,7 +84,7 @@ func main() {
 		log.Fatalln(err)
 	}
 	// Create a Resampler
-	res, err := resample.New(output, float64(*ir), float64(*or), *ch, frmt, resample.HighQ)
+	res, err := resample.New(output, float64(*ir), float64(*or), *ch, inFrmt, outFrmt, resample.HighQ)
 	if err != nil {
 		output.Close()
 		os.Remove(outputFile)

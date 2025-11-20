@@ -46,7 +46,7 @@ Resampler resamples PCM sound data.
 #### func  New
 
 ```go
-func New(writer io.Writer, inputRate, outputRate float64, channels, format, quality int) (*Resampler, error)
+func New(writer io.Writer, inputRate, outputRate float64, channels, inFormat, outFormat, quality int) (*Resampler, error)
 ```
 New returns a pointer to a Resampler that implements an io.WriteCloser. It takes
 as parameters the destination data Writer, the input and output sampling rates,
